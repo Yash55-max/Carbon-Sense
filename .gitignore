@@ -34,3 +34,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 *.log
+
+# Project Documentation and Screenshots
+\# Product Requirement Document (PRD.txt
+DESIGN.md
+screen.png
+screen3.png
+screen4.png
+screen6.png
+Technical Requirement Document (TRD.txt
+
