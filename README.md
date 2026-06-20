@@ -59,21 +59,13 @@ Carbon-Sense/
 Connect your node terminal, register a profile, or synchronize credentials securely from the landing page.
 ![Landing Page Screenshot](landing.png)
 
-### System Overview (Dashboard)
-Review active streams, footprint timelines, and carbon sink offsets.
-![Dashboard Page Screenshot](screen.png)
+### Control Panel Pages
+Once authenticated, the console provides the following interfaces:
+* **System Overview (Dashboard)**: Real-time telemetry monitoring, current monthly footprint trends, daily habit checkboxes, and live carbon sink tracking.
+* **Protocol Input (Log Activity)**: Multi-step ingestion wizard to log daily transit, utility usage, dietary choices, and waste outputs.
+* **Data Insights**: Visualized historical emissions comparison line charts, environmental equivalency meters, and localized carbon reduction targets.
+* **Protocol Challenges**: Gamified community challenges (like No-Drive Mode, Grid Shift) and the active network node leaderboard.
 
-### Protocol Input (Log Activity)
-Log transportation distances, home utility usage, diet habits, and shopping choices.
-![Log Activity Screenshot](screen4.png)
-
-### Data Insights
-Analyze historical comparisons against national averages, inspect local targets, and view environmental translations.
-![Insights Page Screenshot](screen6.png)
-
-### Challenges & Leaderboard
-Participate in active operational goals, track achievements, and inspect the network registry.
-![Challenges Page Screenshot](screen3.png)
 
 ---
 
