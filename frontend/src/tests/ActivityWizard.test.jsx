@@ -45,7 +45,7 @@ function renderWizard() {
 describe('ActivityWizard — Transit slider integration', () => {
   it('renders the wizard with Transit Data step', () => {
     renderWizard();
-    expect(screen.getByText('Transit Data')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Transit Data' })).toBeInTheDocument();
   });
 
   it('slider starts at 42 km (default value)', () => {
@@ -106,7 +106,7 @@ describe('ActivityWizard — Transit slider integration', () => {
     await act(async () => {
       await userEvent.click(nextBtn);
     });
-    expect(screen.getByText('Home Energy')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Home Energy' })).toBeInTheDocument();
   });
 });
 
