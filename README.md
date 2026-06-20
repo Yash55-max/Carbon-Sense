@@ -57,7 +57,7 @@ Carbon-Sense/
 
 ### Landing Page & Authentication Hub
 Connect your node terminal, register a profile, or synchronize credentials securely from the landing page.
-![Landing Page Screenshot](frontend/src/pages/Landing.jsx)
+![Landing Page Screenshot](landing.png)
 
 ### System Overview (Dashboard)
 Review active streams, footprint timelines, and carbon sink offsets.
