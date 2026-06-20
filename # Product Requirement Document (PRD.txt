@@ -1,0 +1,22 @@
+# Product Requirement Document (PRD): CarbonSense
+
+## 1. Product Overview & Vision
+CarbonSense is a terminal-style, developer-centric Carbon Footprint Awareness Platform that translates abstract environmental metrics into actionable, high-precision telemetry. By treating carbon tracking like system resource monitoring, it motivates analytical users to optimize their personal lifestyle parameters through data pipelines, gamified network registries (leaderboards), and responsive micro-habit tracking.
+
+---
+
+## 2. Tiered Feature Architecture & Impact Mapping
+
+### 🟩 High Impact: Problem Statement Alignment & Core Logic
+* **Multi-Modal Ingestion Wizard (`/log-activity`):** A step-by-step pipeline for entering Transit (EV, Petrol, Transit, Flight with distance sliders), Energy, and Lifestyle metrics.
+* **Dynamic Analytics Dashboard (`/dashboard`):** Real-time monitoring of current monthly footprint metrics (in kg CO2e), historical emission lines, and sector breakdowns (Commute, Bolt, Restaurant, Shopping).
+* **Equivalency & Recommendation Engine (`/insights`):** Translates raw data into real-world equivalents (Trees planted, phones charged) and delivers localized action roadmaps.
+
+### 🟨 Medium Impact: Core Processing & Integrity
+* **State Aggregation & Calculation Engine:** Accurate calculations utilizing standard global/regional emission factors with 99.9% data precision simulation.
+* **Gamified Network Operations (`/challenges`):** Cryptographically themed user challenges ("No-Drive Mode", "Grid Shift") tracked via progress wheels and an immutable global leader registry.
+* **Local State Sync (`Sync API`):** Fast client-side state committing mimicking an external API patch request.
+
+### 🟦 Low Impact: Interface Polish & Edge UX
+* **Dev Mode Visual Aesthetics:** Bordered glassmorphic cards, neon highlights (#10B981, #34D399), monospace font styling (JetBrains Mono, Geist), and animated active state elements.
+* **Defensive Error States:** Elegant empty states, fallback bounds for input sliders, and crisp tooltips explaining data accuracy.

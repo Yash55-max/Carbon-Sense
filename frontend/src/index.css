@@ -1,0 +1,188 @@
+/* ── Fonts ─────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Global Base ────────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-cs-bg text-cs-text font-inter;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-geist font-semibold;
+  }
+
+  /* Neon focus ring for keyboard navigation (WCAG) */
+  :focus-visible {
+    outline: 2px solid #10B981;
+    outline-offset: 2px;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar       { width: 4px; }
+  ::-webkit-scrollbar-track { background: #0f131d; }
+  ::-webkit-scrollbar-thumb { background: #262a35; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #10B981; }
+
+  /* Range slider — Kinetic Carbon style */
+  input[type="range"] {
+    @apply appearance-none bg-transparent cursor-pointer w-full;
+    height: 20px;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 3px;
+    background: #262a35;
+    border-radius: 2px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    @apply appearance-none;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: #10B981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    margin-top: -5.5px;
+    transition: box-shadow 0.15s;
+  }
+  input[type="range"]:focus::-webkit-slider-thumb,
+  input[type="range"]:hover::-webkit-slider-thumb {
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.8);
+  }
+
+  /* Checkbox — custom style */
+  input[type="checkbox"] {
+    @apply appearance-none w-5 h-5 border border-cs-surface-top rounded-cs bg-cs-surface cursor-pointer transition-all duration-150;
+  }
+  input[type="checkbox"]:checked {
+    background-color: #10B981;
+    border-color: #10B981;
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230f131d' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+    background-size: 100%;
+  }
+}
+
+/* ── Component Utilities ────────────────────────────────────────────────────── */
+@layer components {
+  /* Glass card with neon border */
+  .cs-card {
+    @apply bg-cs-surface rounded-cs-lg border border-white/[0.08] p-6 transition-all duration-200;
+  }
+  .cs-card:hover {
+    border-color: rgba(255,255,255,0.12);
+  }
+  .cs-card-active {
+    @apply cs-card border-cs-primary/30 shadow-neon;
+  }
+
+  /* Label caps */
+  .cs-label {
+    @apply font-mono text-label text-cs-text-muted tracking-widest uppercase;
+  }
+
+  /* Data display number */
+  .cs-data {
+    @apply font-mono font-semibold text-cs-text;
+  }
+
+  /* Neon primary button */
+  .cs-btn-primary {
+    @apply bg-cs-primary text-cs-bg font-mono font-semibold text-sm px-6 py-2.5 rounded-cs
+           border border-cs-primary transition-all duration-150 cursor-pointer
+           hover:bg-cs-primary-light hover:shadow-neon active:scale-[0.98];
+  }
+
+  /* Ghost button */
+  .cs-btn-ghost {
+    @apply bg-transparent text-cs-primary font-mono font-semibold text-sm px-6 py-2.5 rounded-cs
+           border border-cs-primary/50 transition-all duration-150 cursor-pointer
+           hover:bg-cs-primary/10 hover:border-cs-primary hover:shadow-neon active:scale-[0.98];
+  }
+
+  /* Neon input */
+  .cs-input {
+    @apply bg-cs-surface border border-white/[0.08] rounded-cs px-4 py-2.5 text-cs-text
+           font-mono text-sm w-full transition-all duration-150 outline-none
+           placeholder:text-cs-text-muted;
+  }
+  .cs-input:focus {
+    border-color: #10B981;
+    box-shadow: 0 0 0 1px rgba(16,185,129,0.2), 0 0 8px rgba(16,185,129,0.15);
+  }
+
+  /* Nav item */
+  .cs-nav-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-cs text-sm font-inter text-cs-text-muted
+           cursor-pointer transition-all duration-150 select-none;
+  }
+  .cs-nav-item:hover {
+    @apply text-cs-text bg-cs-surface-high;
+  }
+  .cs-nav-item.active {
+    @apply text-cs-primary bg-cs-surface-high;
+    border-left: 2px solid #10B981;
+  }
+
+  /* Badge chip */
+  .cs-badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono
+           border border-cs-primary/30 text-cs-primary bg-cs-primary/10;
+  }
+
+  /* Progress bar */
+  .cs-progress-track {
+    @apply h-1.5 bg-cs-surface-top rounded-full overflow-hidden;
+  }
+  .cs-progress-fill {
+    @apply h-full bg-cs-primary rounded-full transition-all duration-500;
+    box-shadow: 0 0 6px rgba(16,185,129,0.4);
+  }
+
+  /* Sector bar (mini bar chart) */
+  .cs-sector-bar {
+    @apply h-2 rounded-full bg-cs-surface-top overflow-hidden;
+  }
+  .cs-sector-fill {
+    @apply h-full rounded-full transition-all duration-700;
+  }
+
+  /* Status dot */
+  .cs-dot-live {
+    @apply w-1.5 h-1.5 rounded-full bg-cs-primary animate-pulse;
+  }
+}
+
+/* ── Animations ─────────────────────────────────────────────────────────────── */
+@layer utilities {
+  .animate-fade-in   { animation: fadeIn  0.3s ease-out; }
+  .animate-slide-up  { animation: slideUp 0.35s ease-out; }
+  .animate-glow      { animation: glow    2s ease-in-out infinite alternate; }
+
+  @keyframes fadeIn  { from { opacity: 0; }                      to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes glow    {
+    from { box-shadow: 0 0 4px rgba(16,185,129,0.2); }
+    to   { box-shadow: 0 0 20px rgba(16,185,129,0.5); }
+  }
+
+  /* Circular progress SVG helper */
+  .circular-progress { transform: rotate(-90deg); }
+
+  /* Sidebar collapsed on mobile */
+  @media (max-width: 768px) {
+    .sidebar-mobile-hidden { transform: translateX(-100%); }
+    .sidebar-mobile-show   { transform: translateX(0); }
+  }
+}
