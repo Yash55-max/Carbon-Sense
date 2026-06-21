@@ -4,7 +4,7 @@
  * a corresponding update in the Real-Time Impact preview.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -31,13 +31,13 @@ vi.mock('react-router-dom', () => ({
   NavLink:     ({ children }) => children,
 }));
 
-import ActivityWizard from '../components/log/ActivityWizard';
+import LogActivity from '../pages/LogActivity';
 import { CarbonProtocolProvider } from '../context/CarbonProtocolContext';
 
 function renderWizard() {
   return render(
-    <CarbonProtocolProvider initialUser={{ uid: 'test-uid', displayName: 'Test' }} initialProfile={null}>
-      <ActivityWizard />
+    <CarbonProtocolProvider initialUser={{ uid: 'test-uid', displayName: 'Test' }} initialProfile={null} skipLoad={true}>
+      <LogActivity />
     </CarbonProtocolProvider>
   );
 }
@@ -107,6 +107,22 @@ describe('ActivityWizard — Transit slider integration', () => {
       await userEvent.click(nextBtn);
     });
     expect(screen.getByRole('heading', { name: 'Home Energy' })).toBeInTheDocument();
+  });
+
+  it('changing transit slider updates the Real-Time Impact preview block', async () => {
+    renderWizard();
+    const slider = screen.getByRole('slider', { name: /log daily transit distance/i });
+    
+    // Default preview tons should be 0.631
+    expect(screen.getByText('0.631')).toBeInTheDocument();
+
+    // Set slider to 0
+    await act(async () => {
+      fireEvent.change(slider, { target: { value: '0' } });
+    });
+
+    // Real-Time Impact preview should update to 0.366 tons
+    expect(screen.getByText('0.366')).toBeInTheDocument();
   });
 });
 

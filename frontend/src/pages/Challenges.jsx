@@ -61,7 +61,7 @@ const MOCK_LEADERBOARD = [
 
 export default function Challenges() {
   const { state } = useCarbonProtocol();
-  const { user, userProfile, challenges, unlockedBadges, monthlyFootprint } = state;
+  const { user, userProfile, challenges, unlockedBadges } = state;
 
   const [leaderboard, setLeaderboard]   = useState(MOCK_LEADERBOARD);
   const [lbFilter,    setLbFilter]      = useState('WEEKLY');
@@ -82,9 +82,6 @@ export default function Challenges() {
     };
     load();
   }, []);
-
-  // Find current user's position in leaderboard
-  const currentUserRank = leaderboard.find(e => e.uid === user?.uid);
 
   return (
     <main id="main-content" className="min-h-screen pl-48" aria-label="Protocol Challenges">
@@ -117,7 +114,7 @@ export default function Challenges() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-cs-primary" aria-hidden="true" />
-              <p className="cs-label text-cs-text">Active Operations</p>
+              <h2 className="cs-label text-cs-text text-xs font-semibold tracking-wider">Active Operations</h2>
             </div>
             <p className="cs-label">STATUS: {challenges.filter(c => c.active).length} IN PROGRESS</p>
           </div>
@@ -178,23 +175,22 @@ export default function Challenges() {
 
         {/* Badge Grid */}
         <section className="mt-8" aria-label="Achievement badges">
-          <p className="cs-label mb-4">Locked Achievements</p>
+          <h2 className="cs-label mb-4 text-xs font-semibold tracking-wider">Locked Achievements</h2>
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
             {BADGES.map(({ id, label, Icon }) => {
               const unlocked = unlockedBadges.includes(id);
               return (
-                <div
+                <figure
                   key={id}
                   className={`flex flex-col items-center gap-2 p-3 rounded-cs border transition-all duration-150
                     ${unlocked
                       ? 'border-cs-primary/40 bg-cs-primary/10 text-cs-primary shadow-neon'
                       : 'border-white/[0.06] bg-cs-surface-high text-cs-text-muted'}`}
-                  role="img"
                   aria-label={`${label} badge — ${unlocked ? 'unlocked' : 'locked'}`}
                 >
                   <Icon size={20} aria-hidden="true" />
-                  <p className="cs-label text-[9px] text-center leading-tight uppercase">{label.replace('_', ' ')}</p>
-                </div>
+                  <figcaption className="cs-label text-[9px] text-center leading-tight uppercase">{label.replace('_', ' ')}</figcaption>
+                </figure>
               );
             })}
           </div>
@@ -205,9 +201,9 @@ export default function Challenges() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Trophy size={14} className="text-cs-primary" aria-hidden="true" />
-              <p className="cs-label text-cs-text">Community Leaderboard</p>
+              <h2 className="cs-label text-cs-text text-xs font-semibold tracking-wider">Community Leaderboard</h2>
             </div>
-            <div className="flex gap-1 bg-cs-surface-high rounded-cs p-1" role="group" aria-label="Leaderboard time filter">
+            <div className="flex gap-1 bg-cs-surface-high rounded-cs p-1" aria-label="Leaderboard time filter">
               {['WEEKLY', 'ALL-TIME'].map(f => (
                 <button
                   key={f}
@@ -309,11 +305,11 @@ export default function Challenges() {
       {/* Footer */}
       <footer className="border-t border-white/[0.06] px-6 py-4 mt-8">
         <div className="max-w-screen-xl mx-auto flex flex-wrap gap-x-8 gap-y-2 text-xs font-mono text-cs-text-muted">
-          <span>© 2024 CarbonSense Protocol. Data precision: 99.9% EPSG:4326.</span>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Documentation</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">API Status</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Privacy Policy</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Source</a>
+          <span>© 2026 CarbonSense Protocol. Data precision: 99.9% EPSG:4326.</span>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Documentation</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">API Status</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Privacy Policy</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Source</a>
         </div>
       </footer>
     </main>

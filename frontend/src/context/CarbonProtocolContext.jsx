@@ -10,15 +10,21 @@ import { getUserState, saveUserState, getCachedState, updateLeaderboardEntry } f
 
 // ─── Initial State ────────────────────────────────────────────────────────────
 
-export const INITIAL_STATE = {
+const INITIAL_STATE = {
   // User
   user:              null,       // Firebase Auth user object
   userProfile:       null,       // Firestore profile { displayName, rank, carbonCredits }
 
   // Carbon data
-  monthlyFootprint:  420,        // kg CO2e
+  monthlyFootprint:  320,        // kg CO2e (aligned with initial activities: 42+185+68+25 = 320)
   streakDays:        14,
   activities: {
+    transit:   42,
+    energy:    185,
+    food:      68,
+    shopping:  25,
+  },
+  draftActivities: {
     transit:   42,
     energy:    185,
     food:      68,
@@ -47,12 +53,14 @@ export const ACTIONS = {
   SET_USER_PROFILE:   'SET_USER_PROFILE',
   SET_STATE:          'SET_STATE',
   UPDATE_ACTIVITIES:  'UPDATE_ACTIVITIES',
+  UPDATE_DRAFT_ACTIVITIES: 'UPDATE_DRAFT_ACTIVITIES',
   TOGGLE_BADGE:       'TOGGLE_BADGE',
   UPDATE_CHALLENGE:   'UPDATE_CHALLENGE',
   TOGGLE_HABIT:       'TOGGLE_HABIT',
   SYNC_START:         'SYNC_START',
   SYNC_SUCCESS:       'SYNC_SUCCESS',
   SYNC_ERROR:         'SYNC_ERROR',
+  SYNC_RESET_SUCCESS: 'SYNC_RESET_SUCCESS',
   SET_LOADING:        'SET_LOADING',
 };
 
@@ -70,13 +78,28 @@ function reducer(state, action) {
     case ACTIONS.SET_STATE: {
       const newState = { ...state, ...action.payload };
       const totalKg  = calcTotalFootprint(newState.activities);
-      return { ...newState, monthlyFootprint: totalKg };
+      const activities = newState.activities;
+      return {
+        ...newState,
+        monthlyFootprint: totalKg,
+        draftActivities: { ...activities }
+      };
     }
 
     case ACTIONS.UPDATE_ACTIVITIES: {
       const activities = { ...state.activities, ...action.payload };
       const monthlyFootprint = calcTotalFootprint(activities);
-      return { ...state, activities, monthlyFootprint };
+      return {
+        ...state,
+        activities,
+        draftActivities: { ...activities },
+        monthlyFootprint
+      };
+    }
+
+    case ACTIONS.UPDATE_DRAFT_ACTIVITIES: {
+      const draftActivities = { ...state.draftActivities, ...action.payload };
+      return { ...state, draftActivities };
     }
 
     case ACTIONS.TOGGLE_BADGE: {
@@ -106,6 +129,9 @@ function reducer(state, action) {
     case ACTIONS.SYNC_ERROR:
       return { ...state, isSyncing: false, syncSuccess: false };
 
+    case ACTIONS.SYNC_RESET_SUCCESS:
+      return { ...state, syncSuccess: false };
+
     case ACTIONS.SET_LOADING:
       return { ...state, isLoading: action.payload };
 
@@ -118,44 +144,52 @@ function reducer(state, action) {
 
 const CarbonProtocolContext = createContext(null);
 
-export function CarbonProtocolProvider({ children, initialUser = null, initialProfile = null }) {
+export function CarbonProtocolProvider({ children, initialUser = null, initialProfile = null, skipLoad = false }) {
   const [state, dispatch] = useReducer(reducer, {
     ...INITIAL_STATE,
     user:        initialUser,
     userProfile: initialProfile,
-    history:     generateMockHistory(420),
+    history:     generateMockHistory(320), // Aligned with aligned base footprint
   });
 
   // ── Load user state from Firestore when auth user changes ──────────────────
+  const user = state.user;
   useEffect(() => {
-    if (!state.user) return;
+    let active = true;
+    if (!user || skipLoad) return;
 
     const load = async () => {
       dispatch({ type: ACTIONS.SET_LOADING, payload: true });
       try {
-        const remote = await getUserState(state.user.uid);
+        const remote = await getUserState(user.uid);
+        if (!active) return;
         if (remote) {
           dispatch({ type: ACTIONS.SET_STATE, payload: {
             ...remote,
-            history: remote.history?.length ? remote.history : generateMockHistory(remote.monthlyFootprint ?? 420),
+            history: remote.history?.length ? remote.history : generateMockHistory(remote.monthlyFootprint ?? 320),
           }});
         } else {
           // First-time user — use default state with mock history
-          const cached = getCachedState(state.user.uid);
-          if (cached) dispatch({ type: ACTIONS.SET_STATE, payload: cached });
+          const cached = getCachedState(user.uid);
+          if (cached && active) dispatch({ type: ACTIONS.SET_STATE, payload: cached });
         }
       } catch (err) {
         // Firestore unavailable — fall back to localStorage cache
-        const cached = getCachedState(state.user.uid);
-        if (cached) dispatch({ type: ACTIONS.SET_STATE, payload: cached });
+        const cached = getCachedState(user.uid);
+        if (cached && active) dispatch({ type: ACTIONS.SET_STATE, payload: cached });
         console.warn('Firestore unavailable, using cached state:', err.message);
       } finally {
-        dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+        if (active) {
+          dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+        }
       }
     };
 
     load();
-  }, [state.user?.uid]);
+    return () => {
+      active = false;
+    };
+  }, [user, skipLoad]);
 
   // ── Sync API — commit state to Firestore ───────────────────────────────────
   const syncToFirestore = useCallback(async () => {
@@ -163,15 +197,18 @@ export function CarbonProtocolProvider({ children, initialUser = null, initialPr
     dispatch({ type: ACTIONS.SYNC_START });
     try {
       await saveUserState(state.user.uid, state);
+      
+      const co2Saved = Math.max(0, 560 - state.monthlyFootprint);
+      const completedChallengesCount = state.challenges.filter(c => c.progress >= 100).length;
+      const carbonCredits = co2Saved * 50 + completedChallengesCount * 10000;
+
       await updateLeaderboardEntry(
         state.user.uid,
         state.user.displayName ?? 'Anonymous',
-        state.userProfile?.carbonCredits ?? 0,
-        state.monthlyFootprint,
+        carbonCredits,
+        co2Saved,
       );
       dispatch({ type: ACTIONS.SYNC_SUCCESS });
-      // Auto-reset success flash after 3s
-      setTimeout(() => dispatch({ type: ACTIONS.SYNC_ERROR }), 3000);
     } catch (err) {
       console.error('Sync failed:', err);
       dispatch({ type: ACTIONS.SYNC_ERROR });
@@ -195,4 +232,4 @@ export function useCarbonProtocol() {
   return ctx;
 }
 
-export default CarbonProtocolContext;
+

@@ -3,6 +3,7 @@
  * Matches the design in screen.png / screen3.png exactly.
  */
 
+import { useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, PlusCircle, BarChart2, Trophy,
@@ -19,9 +20,18 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar() {
-  const { state, syncToFirestore } = useCarbonProtocol();
+  const { state, dispatch, syncToFirestore, ACTIONS } = useCarbonProtocol();
   const { user, userProfile, isSyncing, syncSuccess } = state;
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (syncSuccess) {
+      const timer = setTimeout(() => {
+        dispatch({ type: ACTIONS.SYNC_RESET_SUCCESS });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [syncSuccess, dispatch, ACTIONS]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -83,6 +93,7 @@ export default function Sidebar() {
       {/* Sync API Button */}
       <div className="px-3 pb-3">
         <button
+          type="button"
           onClick={syncToFirestore}
           disabled={isSyncing}
           aria-label="Sync data to Firestore"
@@ -108,6 +119,7 @@ export default function Sidebar() {
           <span>Settings</span>
         </NavLink>
         <button
+          type="button"
           onClick={handleSignOut}
           className="cs-nav-item w-full text-left"
           aria-label="Sign out of CarbonSense"

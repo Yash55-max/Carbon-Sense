@@ -21,9 +21,9 @@ export default function SmartRecs({ activities }) {
         <span className="cs-badge">{recs.length} Tasks Ready</span>
       </div>
 
-      <ul className="space-y-2" role="list">
-        {recs.map((rec, i) => (
-          <li key={i}>
+      <ul className="space-y-2">
+        {recs.map((rec) => (
+          <li key={rec.title}>
             <button
               type="button"
               className="w-full flex items-center gap-3 p-3.5 rounded-cs bg-cs-surface-high border border-white/[0.06]

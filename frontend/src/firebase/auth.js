@@ -25,8 +25,10 @@ const googleProvider = new GoogleAuthProvider();
  */
 export const signUpWithEmail = async (email, password, displayName) => {
   const credential = await createUserWithEmailAndPassword(auth, email, password);
-  await updateProfile(credential.user, { displayName });
-  await createUserProfile(credential.user.uid, { displayName, email });
+  await Promise.all([
+    updateProfile(credential.user, { displayName }),
+    createUserProfile(credential.user.uid, { displayName, email }),
+  ]);
   return credential;
 };
 

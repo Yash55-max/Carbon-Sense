@@ -145,10 +145,25 @@
   .cs-progress-track {
     @apply h-1.5 bg-cs-surface-top rounded-full overflow-hidden;
   }
+  progress.cs-progress-track {
+    @apply appearance-none border-none w-full block;
+  }
+  progress.cs-progress-track::-webkit-progress-bar {
+    @apply bg-cs-surface-top rounded-full;
+  }
+  progress.cs-progress-track::-webkit-progress-value {
+    @apply bg-cs-primary rounded-full transition-all duration-500;
+    box-shadow: 0 0 6px rgba(16,185,129,0.4);
+  }
+  progress.cs-progress-track::-moz-progress-bar {
+    @apply bg-cs-primary rounded-full transition-all duration-500;
+    box-shadow: 0 0 6px rgba(16,185,129,0.4);
+  }
   .cs-progress-fill {
     @apply h-full bg-cs-primary rounded-full transition-all duration-500;
     box-shadow: 0 0 6px rgba(16,185,129,0.4);
   }
+
 
   /* Sector bar (mini bar chart) */
   .cs-sector-bar {

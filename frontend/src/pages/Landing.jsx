@@ -3,11 +3,11 @@
  * Sleek, futuristic tech styling with embedded login/register panel.
  */
 
-import { useState } from 'react';
+import { useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Zap, Mail, Lock, User, AlertCircle, Loader2, ArrowRight,
-  Shield, BarChart3, Database, Globe, Layers, Cpu, Award
+  Shield, BarChart3, Database, Globe, Cpu, Award
 } from 'lucide-react';
 import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '../firebase/auth';
 
@@ -22,44 +22,6 @@ const GOOGLE_ICON = (
 
 export default function Landing({ isLoggedIn = false }) {
   const navigate = useNavigate();
-  const [mode,     setMode]     = useState('signin'); // 'signin' | 'signup'
-  const [email,    setEmail]    = useState('');
-  const [password, setPassword] = useState('');
-  const [name,     setName]     = useState('');
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState('');
-
-  const clearError = () => setError('');
-
-  const handleEmailAuth = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      if (mode === 'signup') {
-        await signUpWithEmail(email, password, name || email.split('@')[0]);
-      } else {
-        await signInWithEmail(email, password);
-      }
-      navigate('/dashboard');
-    } catch (err) {
-      setError(getFriendlyError(err.code));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogle = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      await signInWithGoogle();
-      // Redirect flow handles navigation after callback, but we trigger the redirect here
-    } catch (err) {
-      setError(getFriendlyError(err.code));
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-cs-bg text-cs-text relative overflow-x-hidden flex flex-col font-inter">
@@ -99,6 +61,7 @@ export default function Landing({ isLoggedIn = false }) {
           <div>
             {isLoggedIn ? (
               <button
+                type="button"
                 onClick={() => navigate('/dashboard')}
                 className="cs-btn-primary !py-1.5 !px-4 text-xs font-mono flex items-center gap-1.5"
               >
@@ -160,6 +123,7 @@ export default function Landing({ isLoggedIn = false }) {
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => navigate('/dashboard')}
                 className="cs-btn-primary w-full flex items-center justify-center gap-2 py-3"
               >
@@ -167,120 +131,7 @@ export default function Landing({ isLoggedIn = false }) {
               </button>
             </div>
           ) : (
-            <div className="cs-card animate-slide-up relative">
-              {/* Mode Toggle */}
-              <div className="flex mb-6 bg-cs-surface-high rounded-cs p-1" role="tablist" aria-label="Authentication mode">
-                {[['signin', 'Sign In'], ['signup', 'Create Account']].map(([m, label]) => (
-                  <button
-                    key={m}
-                    type="button"
-                    role="tab"
-                    aria-selected={mode === m}
-                    onClick={() => { setMode(m); clearError(); }}
-                    className={`flex-1 py-2 text-xs font-mono rounded-cs transition-all duration-150 cursor-pointer
-                      ${mode === m ? 'bg-cs-surface text-cs-text shadow-card' : 'text-cs-text-muted hover:text-cs-text'}`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Error readout */}
-              {error && (
-                <div
-                  className="flex items-center gap-2 p-3 rounded-cs bg-red-900/20 border border-red-500/30 text-red-400 text-xs font-mono mb-4"
-                  role="alert"
-                >
-                  <AlertCircle size={14} aria-hidden="true" />
-                  {error}
-                </div>
-              )}
-
-              {/* Auth Form */}
-              <form onSubmit={handleEmailAuth} noValidate className="space-y-4">
-                {mode === 'signup' && (
-                  <div>
-                    <label htmlFor="auth-name" className="cs-label mb-1.5 block">Display Name</label>
-                    <div className="relative">
-                      <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cs-text-muted" aria-hidden="true" />
-                      <input
-                        id="auth-name"
-                        type="text"
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                        placeholder="Alpha_User"
-                        className="cs-input pl-9"
-                        autoComplete="name"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <label htmlFor="auth-email" className="cs-label mb-1.5 block">Email Address</label>
-                  <div className="relative">
-                    <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cs-text-muted" aria-hidden="true" />
-                    <input
-                      id="auth-email"
-                      type="email"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      placeholder="user@domain.com"
-                      required
-                      className="cs-input pl-9"
-                      autoComplete="email"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="auth-password" className="cs-label mb-1.5 block">Password</label>
-                  <div className="relative">
-                    <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cs-text-muted" aria-hidden="true" />
-                    <input
-                      id="auth-password"
-                      type="password"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      required
-                      minLength={6}
-                      className="cs-input pl-9"
-                      autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="cs-btn-primary w-full flex items-center justify-center gap-2 mt-2"
-                >
-                  {loading ? (
-                    <><Loader2 size={15} className="animate-spin" aria-hidden="true" /> Ingesting Credentials...</>
-                  ) : mode === 'signup' ? 'Create Node Profile' : 'Synchronize Terminal'}
-                </button>
-              </form>
-
-              {/* Divider */}
-              <div className="flex items-center gap-3 my-4" aria-hidden="true">
-                <div className="flex-1 h-px bg-white/[0.06]" />
-                <span className="cs-label">OR</span>
-                <div className="flex-1 h-px bg-white/[0.06]" />
-              </div>
-
-              {/* Google OAuth button */}
-              <button
-                type="button"
-                onClick={handleGoogle}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-cs border border-white/[0.08] bg-cs-surface-high text-xs font-mono text-cs-text hover:border-white/20 hover:bg-cs-surface-top transition-all duration-150 cursor-pointer"
-                aria-label="Sign in with Google"
-              >
-                {GOOGLE_ICON}
-                Ingest Google Credentials
-              </button>
-            </div>
+            <AuthPanel navigate={navigate} />
           )}
         </div>
       </section>
@@ -446,9 +297,9 @@ export default function Landing({ isLoggedIn = false }) {
           </div>
 
           <div className="flex flex-wrap gap-6 text-[11px] font-mono text-cs-text-muted justify-center">
-            <a href="#" className="hover:text-cs-text transition-colors">DOCUMENTATION</a>
-            <a href="#" className="hover:text-cs-text transition-colors">API STATUS</a>
-            <a href="#" className="hover:text-cs-text transition-colors">PRIVACY POLICY</a>
+            <a href="https://github.com/yash55-max/Carbon-Sense" className="hover:text-cs-text transition-colors">DOCUMENTATION</a>
+            <a href="https://github.com/yash55-max/Carbon-Sense" className="hover:text-cs-text transition-colors">API STATUS</a>
+            <a href="https://github.com/yash55-max/Carbon-Sense" className="hover:text-cs-text transition-colors">PRIVACY POLICY</a>
           </div>
 
           <p className="cs-label text-[9px] text-cs-text-muted text-center md:text-right">
@@ -471,4 +322,190 @@ function getFriendlyError(code) {
     'auth/network-request-failed': 'Network error. Check your connection.',
   };
   return map[code] ?? 'Authentication failed. Please try again.';
+}
+
+const initialAuthState = {
+  mode: 'signin',
+  email: '',
+  password: '',
+  name: '',
+  loading: false,
+  error: '',
+};
+
+function authReducer(state, action) {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return { ...state, [action.field]: action.value };
+    case 'SET_MODE':
+      return { ...state, mode: action.payload, error: '' };
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload };
+    case 'CLEAR_ERROR':
+      return { ...state, error: '' };
+    default:
+      return state;
+  }
+}
+
+function AuthPanel({ navigate }) {
+  const [state, dispatch] = useReducer(authReducer, initialAuthState);
+  const { mode, email, password, name, loading, error } = state;
+
+  const setEmail = (val) => dispatch({ type: 'SET_FIELD', field: 'email', value: val });
+  const setPassword = (val) => dispatch({ type: 'SET_FIELD', field: 'password', value: val });
+  const setName = (val) => dispatch({ type: 'SET_FIELD', field: 'name', value: val });
+  const setMode = (val) => dispatch({ type: 'SET_MODE', payload: val });
+  const setLoading = (val) => dispatch({ type: 'SET_LOADING', payload: val });
+  const setError = (val) => dispatch({ type: 'SET_ERROR', payload: val });
+  const clearError = () => dispatch({ type: 'CLEAR_ERROR' });
+
+  const handleEmailAuth = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      if (mode === 'signup') {
+        await signUpWithEmail(email, password, name || email.split('@')[0]);
+      } else {
+        await signInWithEmail(email, password);
+      }
+      navigate('/dashboard');
+    } catch (err) {
+      setError(getFriendlyError(err.code));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await signInWithGoogle();
+      // Redirect flow handles navigation after callback, but we trigger the redirect here
+    } catch (err) {
+      setError(getFriendlyError(err.code));
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="cs-card animate-slide-up relative">
+      {/* Mode Toggle */}
+      <div className="flex mb-6 bg-cs-surface-high rounded-cs p-1" role="tablist" aria-label="Authentication mode">
+        {[['signin', 'Sign In'], ['signup', 'Create Account']].map(([m, label]) => (
+          <button
+            key={m}
+            type="button"
+            role="tab"
+            aria-selected={mode === m}
+            onClick={() => { setMode(m); clearError(); }}
+            className={`flex-1 py-2 text-xs font-mono rounded-cs transition-all duration-150 cursor-pointer
+              ${mode === m ? 'bg-cs-surface text-cs-text shadow-card' : 'text-cs-text-muted hover:text-cs-text'}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Error readout */}
+      {error && (
+        <div
+          className="flex items-center gap-2 p-3 rounded-cs bg-red-900/20 border border-red-500/30 text-red-400 text-xs font-mono mb-4"
+          role="alert"
+        >
+          <AlertCircle size={14} aria-hidden="true" />
+          {error}
+        </div>
+      )}
+
+      {/* Auth Form */}
+      <form onSubmit={handleEmailAuth} noValidate className="space-y-4">
+        {mode === 'signup' && (
+          <div>
+            <label htmlFor="auth-name" className="cs-label mb-1.5 block">Display Name</label>
+            <div className="relative">
+              <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cs-text-muted" aria-hidden="true" />
+              <input
+                id="auth-name"
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Alpha_User"
+                className="cs-input pl-9"
+                autoComplete="name"
+              />
+            </div>
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="auth-email" className="cs-label mb-1.5 block">Email Address</label>
+          <div className="relative">
+            <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cs-text-muted" aria-hidden="true" />
+            <input
+              id="auth-email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="user@domain.com"
+              required
+              className="cs-input pl-9"
+              autoComplete="email"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="auth-password" className="cs-label mb-1.5 block">Password</label>
+          <div className="relative">
+            <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cs-text-muted" aria-hidden="true" />
+            <input
+              id="auth-password"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              minLength={6}
+              className="cs-input pl-9"
+              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="cs-btn-primary w-full flex items-center justify-center gap-2 mt-2"
+        >
+          {loading ? (
+            <><Loader2 size={15} className="animate-spin" aria-hidden="true" /> Ingesting Credentials...</>
+          ) : mode === 'signup' ? 'Create Node Profile' : 'Synchronize Terminal'}
+        </button>
+      </form>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3 my-4" aria-hidden="true">
+        <div className="flex-1 h-px bg-white/[0.06]" />
+        <span className="cs-label">OR</span>
+        <div className="flex-1 h-px bg-white/[0.06]" />
+      </div>
+
+      {/* Google OAuth button */}
+      <button
+        type="button"
+        onClick={handleGoogle}
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-cs border border-white/[0.08] bg-cs-surface-high text-xs font-mono text-cs-text hover:border-white/20 hover:bg-cs-surface-top transition-all duration-150 cursor-pointer"
+        aria-label="Sign in with Google"
+      >
+        {GOOGLE_ICON}
+        Ingest Google Credentials
+      </button>
+    </div>
+  );
 }

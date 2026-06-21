@@ -3,11 +3,16 @@
  * Matches screen6.png: emission comparison chart, equivalency grid, smart recs.
  */
 
-import { useState, useMemo } from 'react';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+import { useState, useMemo, lazy, Suspense } from 'react';
+
+const LineChart = lazy(() => import('recharts').then(m => ({ default: m.LineChart })));
+const Line = lazy(() => import('recharts').then(m => ({ default: m.Line })));
+const XAxis = lazy(() => import('recharts').then(m => ({ default: m.XAxis })));
+const YAxis = lazy(() => import('recharts').then(m => ({ default: m.YAxis })));
+const CartesianGrid = lazy(() => import('recharts').then(m => ({ default: m.CartesianGrid })));
+const Tooltip = lazy(() => import('recharts').then(m => ({ default: m.Tooltip })));
+const ResponsiveContainer = lazy(() => import('recharts').then(m => ({ default: m.ResponsiveContainer })));
+const Legend = lazy(() => import('recharts').then(m => ({ default: m.Legend })));
 import { useCarbonProtocol } from '../context/CarbonProtocolContext';
 import EquivalencyGrid from '../components/insights/EquivalencyGrid';
 import SmartRecs from '../components/insights/SmartRecs';
@@ -16,6 +21,8 @@ const TIME_FILTERS = ['WEEKLY', 'MONTHLY', 'YEARLY'];
 const NATIONAL_AVG = 560;
 const CITY_AVG     = 4.2;
 const LOCAL_TARGET = 2.5;
+const CHART_TICK_STYLE = { fill: '#86948a', fontSize: 9, fontFamily: 'JetBrains Mono' };
+const LEGEND_WRAPPER_STYLE = { fontSize: '10px', fontFamily: 'JetBrains Mono', color: '#86948a', paddingTop: '12px' };
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -62,7 +69,6 @@ export default function Insights() {
           {/* Time filter */}
           <div
             className="flex bg-cs-surface-high rounded-cs p-1 border border-white/[0.06]"
-            role="group"
             aria-label="Time period filter"
           >
             {TIME_FILTERS.map(f => (
@@ -91,32 +97,34 @@ export default function Insights() {
             aria-label="Emission comparison chart"
           >
             <div className="flex items-center justify-between mb-4">
-              <p className="cs-label">Emission Comparison (kg CO₂e)</p>
+              <h2 className="cs-label text-xs font-semibold tracking-wider">Emission Comparison (kg CO₂e)</h2>
             </div>
-            <div className="h-56" role="img" aria-label={`${timeFilter.toLowerCase()} emission comparison line chart`}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: '#86948a', fontSize: 9, fontFamily: 'JetBrains Mono' }}
-                    axisLine={false} tickLine={false}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis
-                    tick={{ fill: '#86948a', fontSize: 9, fontFamily: 'JetBrains Mono' }}
-                    axisLine={false} tickLine={false}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend
-                    wrapperStyle={{ fontSize: '10px', fontFamily: 'JetBrains Mono', color: '#86948a', paddingTop: '12px' }}
-                  />
-                  <Line type="monotone" dataKey="you"      name="You"          stroke="#10B981" strokeWidth={2} dot={false} activeDot={{ r: 3, fill: '#10B981' }} />
-                  <Line type="monotone" dataKey="national" name="National Avg" stroke="#60A5FA" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
-                  <Line type="monotone" dataKey="target"   name="Target"       stroke="#10B981" strokeWidth={1} strokeDasharray="4 4" dot={false} strokeOpacity={0.4} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <figure className="h-56" aria-label={`${timeFilter.toLowerCase()} emission comparison line chart`}>
+              <Suspense fallback={<div className="h-full flex items-center justify-center font-mono text-xs text-cs-text-muted">LOADING CHART…</div>}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      tick={CHART_TICK_STYLE}
+                      axisLine={false} tickLine={false}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={CHART_TICK_STYLE}
+                      axisLine={false} tickLine={false}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend
+                      wrapperStyle={LEGEND_WRAPPER_STYLE}
+                    />
+                    <Line type="monotone" dataKey="you"      name="You"          stroke="#10B981" strokeWidth={2} dot={false} activeDot={{ r: 3, fill: '#10B981' }} />
+                    <Line type="monotone" dataKey="national" name="National Avg" stroke="#60A5FA" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
+                    <Line type="monotone" dataKey="target"   name="Target"       stroke="#10B981" strokeWidth={1} strokeDasharray="4 4" dot={false} strokeOpacity={0.4} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Suspense>
+            </figure>
           </section>
 
           {/* Right: Equivalency grid */}
@@ -136,7 +144,7 @@ export default function Insights() {
           {/* Regional footprint context */}
           <aside className="cs-card" aria-label="Regional footprint context">
             <div className="flex items-center justify-between mb-4">
-              <p className="cs-label">Regional Footprint Context</p>
+              <h2 className="cs-label text-xs font-semibold tracking-wider">Regional Footprint Context</h2>
               <span className="cs-badge">
                 <span className="w-1.5 h-1.5 rounded-full bg-cs-primary animate-pulse" aria-hidden="true" />
                 Live Grid Feed
@@ -187,11 +195,11 @@ export default function Insights() {
       {/* Footer */}
       <footer className="border-t border-white/[0.06] px-6 py-4 mt-8">
         <div className="max-w-screen-xl mx-auto flex flex-wrap gap-x-8 gap-y-2 text-xs font-mono text-cs-text-muted">
-          <span>© 2024 CarbonSense Protocol. Data precision: 99.9% EPSG:4326.</span>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Documentation</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">API Status</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Privacy Policy</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Source</a>
+          <span>© 2026 CarbonSense Protocol. Data precision: 99.9% EPSG:4326.</span>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Documentation</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">API Status</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Privacy Policy</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Source</a>
         </div>
       </footer>
     </main>

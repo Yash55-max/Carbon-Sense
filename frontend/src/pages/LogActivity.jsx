@@ -3,13 +3,10 @@
  * Multi-step wizard + real-time impact sidebar. Matches screen4.png.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Info } from 'lucide-react';
 import ActivityWizard from '../components/log/ActivityWizard';
-import {
-  calcTransitEmissions, calcEnergyEmissions, calcFoodEmissions,
-  calcShoppingEmissions, validateDistance,
-} from '../utils/carbonEngine';
+import { useCarbonProtocol } from '../context/CarbonProtocolContext';
 
 const ADVICE_TIPS = [
   'Reducing meat consumption by 40% can decrease your annual dietary footprint by approximately 0.8 metric tons of CO₂.',
@@ -21,26 +18,28 @@ const ADVICE_TIPS = [
 const GLOBAL_AVG = 4.7; // t/yr
 
 export default function LogActivity() {
-  // Lift state for real-time preview from wizard defaults
-  const [liveVehicle,   ] = useState('petrol');
-  const [liveDistance,  ] = useState(42);
-  const [liveDietType,  ] = useState('omnivore');
+  const { state } = useCarbonProtocol();
+  const { draftActivities } = state;
 
-  // Preview computed from current wizard defaults (matches screen4.png: 1.24 t)
+  // Preview computed from current wizard draft states (matches screen4.png: 1.24 t)
   const preview = useMemo(() => {
-    const transit = calcTransitEmissions(liveVehicle, validateDistance(liveDistance));
-    const energy  = calcEnergyEmissions(12, false);
-    const food    = calcFoodEmissions(liveDietType);
-    const shopping= calcShoppingEmissions('medium');
+    const transit = draftActivities?.transit ?? 0;
+    const energy  = draftActivities?.energy ?? 0;
+    const food    = draftActivities?.food ?? 0;
+    const shopping= draftActivities?.shopping ?? 0;
     const total   = transit + energy + food + shopping;
     return {
       tons:           parseFloat((total / 1000).toFixed(3)),
       transitAccuracy:92,
       energyReliability: 78,
     };
-  }, [liveVehicle, liveDistance, liveDietType]);
+  }, [draftActivities]);
 
-  const tip = ADVICE_TIPS[Math.floor(Date.now() / 60000) % ADVICE_TIPS.length];
+  const tip = useMemo(() => {
+    // Select tip deterministically based on day of month to avoid hydration mismatch
+    const day = new Date().getDate();
+    return ADVICE_TIPS[day % ADVICE_TIPS.length];
+  }, []);
 
   return (
     <main id="main-content" className="min-h-screen pl-48" aria-label="Log Activity">
@@ -69,7 +68,7 @@ export default function LogActivity() {
 
             {/* Impact preview card */}
             <section className="cs-card" aria-label="Current estimated impact">
-              <p className="cs-label mb-4">Real-Time Impact</p>
+              <h2 className="cs-label mb-4 text-xs font-semibold tracking-wider">Real-Time Impact</h2>
               <p
                 className="font-mono font-bold text-cs-primary leading-none"
                 style={{ fontSize: '3rem' }}
@@ -91,16 +90,12 @@ export default function LogActivity() {
                       <span>{label}</span>
                       <span className="text-cs-text">{value}%</span>
                     </div>
-                    <div
-                      className="cs-progress-track"
-                      role="progressbar"
-                      aria-valuenow={value}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
+                    <progress
+                      className="cs-progress-track w-full"
+                      value={value}
+                      max={100}
                       aria-label={`${label}: ${value}%`}
-                    >
-                      <div className="cs-progress-fill" style={{ width: `${value}%` }} />
-                    </div>
+                    />
                   </div>
                 ))}
               </div>
@@ -111,7 +106,7 @@ export default function LogActivity() {
               <div className="flex items-start gap-2.5">
                 <Info size={14} className="text-cs-primary shrink-0 mt-0.5" aria-hidden="true" />
                 <div>
-                  <p className="text-sm font-semibold text-cs-text mb-1">Protocol Advice</p>
+                  <h2 className="text-sm font-semibold text-cs-text mb-1">Protocol Advice</h2>
                   <p className="text-xs text-cs-text-muted leading-relaxed">{tip}</p>
                 </div>
               </div>
@@ -127,7 +122,7 @@ export default function LogActivity() {
               aria-label="Global average emissions"
             >
               <div className="relative z-10">
-                <p className="cs-label text-cs-primary">Global Average</p>
+                <h2 className="cs-label text-cs-primary text-xs font-semibold tracking-wider">Global Average</h2>
                 <p className="font-mono font-bold text-cs-text mt-1" style={{ fontSize: '2rem' }}>
                   {GLOBAL_AVG} <span className="text-lg text-cs-text-muted">t/y</span>
                 </p>
@@ -147,10 +142,10 @@ export default function LogActivity() {
       <footer className="border-t border-white/[0.06] px-6 py-4">
         <div className="max-w-screen-xl mx-auto flex flex-wrap gap-x-8 gap-y-2 text-xs font-mono text-cs-text-muted">
           <span>© 2024 CarbonSense Protocol. Data precision: 99.9% EPSG:4326.</span>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Documentation</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">API Status</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Privacy Policy</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Source</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Documentation</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">API Status</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Privacy Policy</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Source</a>
         </div>
       </footer>
     </main>

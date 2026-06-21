@@ -9,7 +9,6 @@ import {
   calcTransitEmissions,
   calcEnergyEmissions,
   calcFoodEmissions,
-  calcShoppingEmissions,
   calcTotalFootprint,
   validateDistance,
   validateNumericInput,

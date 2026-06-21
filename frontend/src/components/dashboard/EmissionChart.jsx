@@ -3,13 +3,20 @@
  * Shows the 30-day emission timeline vs national average.
  */
 
-import { useMemo } from 'react';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, ReferenceLine,
-} from 'recharts';
+import { useMemo, lazy, Suspense } from 'react';
+
+const AreaChart = lazy(() => import('recharts').then(m => ({ default: m.AreaChart })));
+const Area = lazy(() => import('recharts').then(m => ({ default: m.Area })));
+const XAxis = lazy(() => import('recharts').then(m => ({ default: m.XAxis })));
+const YAxis = lazy(() => import('recharts').then(m => ({ default: m.YAxis })));
+const CartesianGrid = lazy(() => import('recharts').then(m => ({ default: m.CartesianGrid })));
+const Tooltip = lazy(() => import('recharts').then(m => ({ default: m.Tooltip })));
+const ResponsiveContainer = lazy(() => import('recharts').then(m => ({ default: m.ResponsiveContainer })));
+const ReferenceLine = lazy(() => import('recharts').then(m => ({ default: m.ReferenceLine })));
 
 const NATIONAL_AVG = 560; // kg CO2e/month average
+const DEFAULT_DATA = [];
+const CHART_TICK_STYLE = { fill: '#86948a', fontSize: 10, fontFamily: 'JetBrains Mono' };
 
 /** Custom tooltip matching the terminal aesthetic */
 const CustomTooltip = ({ active, payload, label }) => {
@@ -29,7 +36,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 /**
  * @param {{ data: Array<{date, kg}>, currentFootprint: number }} props
  */
-export default function EmissionChart({ data = [], currentFootprint = 420 }) {
+export default function EmissionChart({ data = DEFAULT_DATA, currentFootprint = 420 }) {
   // Merge user data with national average line
   const chartData = useMemo(() =>
     data.map(d => ({
@@ -66,65 +73,67 @@ export default function EmissionChart({ data = [], currentFootprint = 420 }) {
       </div>
 
       {/* Chart */}
-      <div className="h-48" role="img" aria-label="30-day carbon emissions area chart">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="emissionGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#10B981" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="nationalGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#60A5FA" stopOpacity={0.1} />
-                <stop offset="95%" stopColor="#60A5FA" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-            <XAxis
-              dataKey="date"
-              tick={{ fill: '#86948a', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-              axisLine={false}
-              tickLine={false}
-              interval="preserveStartEnd"
-            />
-            <YAxis
-              tick={{ fill: '#86948a', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            {/* Target line */}
-            <ReferenceLine
-              y={Math.round(currentFootprint * 0.75)}
-              stroke="rgba(16,185,129,0.2)"
-              strokeDasharray="4 4"
-              label={{ value: 'TARGET', fill: '#86948a', fontSize: 9, fontFamily: 'JetBrains Mono' }}
-            />
-            {/* National average */}
-            <Area
-              type="monotone"
-              dataKey="national"
-              name="National Avg"
-              stroke="#60A5FA"
-              strokeWidth={1.5}
-              strokeDasharray="4 4"
-              fill="url(#nationalGrad)"
-              dot={false}
-            />
-            {/* User emissions */}
-            <Area
-              type="monotone"
-              dataKey="kg"
-              name="You"
-              stroke="#10B981"
-              strokeWidth={2}
-              fill="url(#emissionGrad)"
-              dot={false}
-              activeDot={{ r: 4, fill: '#10B981', strokeWidth: 0 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      <figure className="h-48" aria-label="30-day carbon emissions area chart">
+        <Suspense fallback={<div className="h-full flex items-center justify-center font-mono text-xs text-cs-text-muted">LOADING DATA CHART…</div>}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="emissionGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor="#10B981" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="nationalGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor="#60A5FA" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#60A5FA" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+              <XAxis
+                dataKey="date"
+                tick={CHART_TICK_STYLE}
+                axisLine={false}
+                tickLine={false}
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                tick={CHART_TICK_STYLE}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              {/* Target line */}
+              <ReferenceLine
+                y={Math.round(currentFootprint * 0.75)}
+                stroke="rgba(16,185,129,0.2)"
+                strokeDasharray="4 4"
+                label={{ value: 'TARGET', fill: '#86948a', fontSize: 9, fontFamily: 'JetBrains Mono' }}
+              />
+              {/* National average */}
+              <Area
+                type="monotone"
+                dataKey="national"
+                name="National Avg"
+                stroke="#60A5FA"
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                fill="url(#nationalGrad)"
+                dot={false}
+              />
+              {/* User emissions */}
+              <Area
+                type="monotone"
+                dataKey="kg"
+                name="You"
+                stroke="#10B981"
+                strokeWidth={2}
+                fill="url(#emissionGrad)"
+                dot={false}
+                activeDot={{ r: 4, fill: '#10B981', strokeWidth: 0 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Suspense>
+      </figure>
 
       {/* Legend */}
       <div className="flex gap-4 mt-3" aria-label="Chart legend">

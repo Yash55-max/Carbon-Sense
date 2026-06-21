@@ -51,7 +51,7 @@ export default function EquivalencyGrid({ kgCO2e = 420 }) {
     <section aria-label="Environmental equivalency impact">
       <p className="cs-label mb-4">Equivalency Impact</p>
       <div className="space-y-3">
-        {EQUIVALENCY_CONFIG.map(({ key, label, Icon, unit, color, desc, format }) => {
+        {EQUIVALENCY_CONFIG.map(({ key, label, Icon, unit, color, format }) => {
           const raw   = equiv[key] ?? 0;
           const value = format ? format(raw) : raw.toLocaleString();
           return (

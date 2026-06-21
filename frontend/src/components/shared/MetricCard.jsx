@@ -62,9 +62,8 @@ export default function MetricCard({
       <p className="cs-label">{label}</p>
 
       {/* Mini bar chart */}
-      <div
+      <figure
         className="flex items-end gap-0.5 h-8"
-        role="img"
         aria-label={`Weekly ${label} trend chart`}
       >
         {bars.map((v, i) => (
@@ -78,7 +77,7 @@ export default function MetricCard({
             }}
           />
         ))}
-      </div>
+      </figure>
 
       {/* Progress bar */}
       <div className="cs-progress-track" aria-hidden="true">

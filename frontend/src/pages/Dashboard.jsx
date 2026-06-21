@@ -92,8 +92,8 @@ export default function Dashboard() {
 
           {/* Carbon sink activity */}
           <aside className="cs-card" aria-label="Carbon sink activity">
-            <p className="cs-label mb-4">Carbon Sink Activity</p>
-            <ul className="space-y-3" role="list">
+            <h2 className="cs-label mb-4 text-xs font-semibold tracking-wider">Carbon Sink Activity</h2>
+            <ul className="space-y-3">
               {CARBON_SINK_ITEMS.map(item => (
                 <li key={item.title} className="flex items-center gap-3">
                   <div
@@ -117,12 +117,12 @@ export default function Dashboard() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06] px-6 py-4 pl-48">
+      <footer className="border-t border-white/[0.06] px-6 py-4 mt-8">
         <div className="max-w-screen-xl mx-auto flex flex-wrap gap-x-8 gap-y-2 text-xs font-mono text-cs-text-muted">
           <span>CARBON_SENSE_PRTCL // EPSG:4326</span>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Documentation</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">API Status</a>
-          <a href="#" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Privacy Policy</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Documentation</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">API Status</a>
+          <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Privacy Policy</a>
           <span className="ml-auto">SOURCE© 2024 CarbonSense Protocol. Data precision: 99.9%</span>
         </div>
       </footer>

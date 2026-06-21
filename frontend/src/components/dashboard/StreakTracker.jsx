@@ -43,22 +43,18 @@ export default function StreakTracker({ streakDays = 14 }) {
           <p className="cs-label">Offset Progress</p>
           <span className="font-mono text-xs text-cs-primary font-semibold">{offsetPct}%</span>
         </div>
-        <div
-          className="cs-progress-track"
-          role="progressbar"
-          aria-valuenow={offsetPct}
-          aria-valuemin={0}
-          aria-valuemax={100}
+        <progress
+          className="cs-progress-track w-full"
+          value={offsetPct}
+          max={100}
           aria-label={`Offset progress: ${offsetPct}%`}
-        >
-          <div className="cs-progress-fill" style={{ width: `${offsetPct}%` }} />
-        </div>
+        />
       </div>
 
       {/* Habit list */}
       <section aria-label="Today's habits">
-        <p className="cs-label mb-3">Today's Habits</p>
-        <ul className="space-y-3" role="list">
+        <p className="cs-label mb-3">{"Today's Habits"}</p>
+        <ul className="space-y-3">
           {habits.map(({ id, label, Icon, defaultChecked }) => (
             <li key={id} className="flex items-center gap-3">
               <Icon
