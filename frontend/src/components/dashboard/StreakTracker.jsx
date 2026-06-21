@@ -4,24 +4,25 @@
  */
 
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Bus, Leaf, Zap } from 'lucide-react';
 
 const DEFAULT_HABITS = [
-  { id: 'public_transit', label: 'Public Transit',    Icon: Bus,  defaultChecked: true  },
-  { id: 'meatless_meal',  label: 'Meatless Meal',     Icon: Leaf, defaultChecked: true  },
-  { id: 'zero_standby',   label: 'Zero Standby Power',Icon: Zap,  defaultChecked: false },
+  { id: 'public_transit', label: 'Public Transit',    Icon: Bus,  checked: true  },
+  { id: 'meatless_meal',  label: 'Meatless Meal',     Icon: Leaf, checked: true  },
+  { id: 'zero_standby',   label: 'Zero Standby Power',Icon: Zap,  checked: false },
 ];
 
 /** @param {{ streakDays: number }} props */
 export default function StreakTracker({ streakDays = 14 }) {
   const [habits, setHabits] = useState(DEFAULT_HABITS);
 
-  const checkedCount = habits.filter(h => h.defaultChecked).length;
+  const checkedCount = habits.filter(h => h.checked).length;
   const offsetPct    = Math.round((checkedCount / habits.length) * 100);
 
   const toggle = (id) => {
     setHabits(prev =>
-      prev.map(h => h.id === id ? { ...h, defaultChecked: !h.defaultChecked } : h)
+      prev.map(h => h.id === id ? { ...h, checked: !h.checked } : h)
     );
   };
 
@@ -55,20 +56,20 @@ export default function StreakTracker({ streakDays = 14 }) {
       <section aria-label="Today's habits">
         <p className="cs-label mb-3">{"Today's Habits"}</p>
         <ul className="space-y-3">
-          {habits.map(({ id, label, Icon, defaultChecked }) => (
+          {habits.map(({ id, label, Icon, checked }) => (
             <li key={id} className="flex items-center gap-3">
               <Icon
                 size={16}
-                className={defaultChecked ? 'text-cs-primary' : 'text-cs-text-muted'}
+                className={checked ? 'text-cs-primary' : 'text-cs-text-muted'}
                 aria-hidden="true"
               />
-              <span className={`flex-1 text-sm ${defaultChecked ? 'text-cs-text' : 'text-cs-text-muted'}`}>
+              <span className={`flex-1 text-sm ${checked ? 'text-cs-text' : 'text-cs-text-muted'}`}>
                 {label}
               </span>
               <input
                 type="checkbox"
                 id={`habit-${id}`}
-                checked={defaultChecked}
+                checked={checked}
                 onChange={() => toggle(id)}
                 aria-label={`Mark ${label} habit as complete`}
               />
@@ -79,3 +80,8 @@ export default function StreakTracker({ streakDays = 14 }) {
     </aside>
   );
 }
+
+StreakTracker.propTypes = {
+  /** Number of consecutive days in the current streak */
+  streakDays: PropTypes.number,
+};

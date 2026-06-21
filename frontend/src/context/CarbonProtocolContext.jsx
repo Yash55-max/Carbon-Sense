@@ -10,6 +10,9 @@ import { getUserState, saveUserState, getCachedState, updateLeaderboardEntry } f
 
 // ─── Initial State ────────────────────────────────────────────────────────────
 
+/** National average monthly footprint baseline (kg CO₂e). Source: IEA 2023 */
+const NATIONAL_BASELINE_KG = 560;
+
 const INITIAL_STATE = {
   // User
   user:              null,       // Firebase Auth user object
@@ -232,4 +235,4 @@ export function useCarbonProtocol() {
   return ctx;
 }
 
-
+export { NATIONAL_BASELINE_KG };

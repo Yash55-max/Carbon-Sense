@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { ChevronRight } from 'lucide-react';
 import { calcSmartRecommendations } from '../../utils/carbonEngine';
 
@@ -63,3 +64,13 @@ export default function SmartRecs({ activities }) {
     </section>
   );
 }
+
+SmartRecs.propTypes = {
+  /** Activity emissions breakdown { transit, energy, food, shopping } in kg CO2e */
+  activities: PropTypes.shape({
+    transit:  PropTypes.number,
+    energy:   PropTypes.number,
+    food:     PropTypes.number,
+    shopping: PropTypes.number,
+  }).isRequired,
+};

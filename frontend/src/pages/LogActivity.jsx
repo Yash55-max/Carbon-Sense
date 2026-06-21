@@ -141,7 +141,7 @@ export default function LogActivity() {
       {/* Footer */}
       <footer className="border-t border-white/[0.06] px-6 py-4">
         <div className="max-w-screen-xl mx-auto flex flex-wrap gap-x-8 gap-y-2 text-xs font-mono text-cs-text-muted">
-          <span>© 2024 CarbonSense Protocol. Data precision: 99.9% EPSG:4326.</span>
+          <span>© 2026 CarbonSense Protocol. Data precision: 99.9% EPSG:4326.</span>
           <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Documentation</a>
           <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">API Status</a>
           <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Privacy Policy</a>

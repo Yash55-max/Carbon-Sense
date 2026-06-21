@@ -123,7 +123,7 @@ export default function Dashboard() {
           <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Documentation</a>
           <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">API Status</a>
           <a href="https://github.com/yash55-max/Carbon-Sense" rel="noopener noreferrer" className="hover:text-cs-text transition-colors">Privacy Policy</a>
-          <span className="ml-auto">SOURCE© 2024 CarbonSense Protocol. Data precision: 99.9%</span>
+          <span className="ml-auto">SOURCE© 2026 CarbonSense Protocol. Data precision: 99.9%</span>
         </div>
       </footer>
     </main>

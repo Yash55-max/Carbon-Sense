@@ -4,6 +4,8 @@
  */
 
 import { useMemo, lazy, Suspense } from 'react';
+import PropTypes from 'prop-types';
+import { calcPercentChange } from '../../utils/carbonEngine';
 
 const AreaChart = lazy(() => import('recharts').then(m => ({ default: m.AreaChart })));
 const Area = lazy(() => import('recharts').then(m => ({ default: m.Area })));
@@ -47,6 +49,18 @@ export default function EmissionChart({ data = DEFAULT_DATA, currentFootprint = 
     [data, currentFootprint]
   );
 
+  // Compute month-over-month trend from history (last vs penultimate point)
+  const trendPct = useMemo(() => {
+    if (data.length < 2) return null;
+    const current  = data[data.length - 1]?.kg ?? currentFootprint;
+    const previous = data[data.length - 2]?.kg ?? currentFootprint;
+    return calcPercentChange(current, previous);
+  }, [data, currentFootprint]);
+
+  const trendLabel = trendPct === null
+    ? null
+    : `${trendPct > 0 ? '↗' : '↘'} ${trendPct > 0 ? '+' : ''}${trendPct}% vs prev period`;
+
   return (
     <section
       className="cs-card"
@@ -63,7 +77,7 @@ export default function EmissionChart({ data = DEFAULT_DATA, currentFootprint = 
             <span className="font-mono text-xl text-cs-text-muted">kg CO₂e</span>
           </div>
           <p className="text-xs text-cs-primary mt-1 font-mono">
-            ↘ -12.4% vs last month
+            {trendLabel ?? '─ No trend data'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -159,3 +173,13 @@ export default function EmissionChart({ data = DEFAULT_DATA, currentFootprint = 
     </section>
   );
 }
+
+EmissionChart.propTypes = {
+  /** 30-day history array of { date: string, kg: number } */
+  data:              PropTypes.arrayOf(PropTypes.shape({
+    date: PropTypes.string,
+    kg:   PropTypes.number,
+  })),
+  /** Current monthly footprint total in kg CO2e */
+  currentFootprint:  PropTypes.number,
+};

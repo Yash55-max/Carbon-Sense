@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * @param {Object} props
@@ -89,3 +90,18 @@ export default function MetricCard({
     </article>
   );
 }
+
+MetricCard.propTypes = {
+  /** Lucide icon node */
+  icon:        PropTypes.node.isRequired,
+  /** Category label (CAPS) */
+  label:       PropTypes.string.isRequired,
+  /** kg CO2e value */
+  value:       PropTypes.number,
+  /** Max value for sector bar */
+  maxValue:    PropTypes.number,
+  /** Hex color for the sector bar fill */
+  accentColor: PropTypes.string,
+  /** Optional 7-point weekly array for mini bar chart */
+  weekData:    PropTypes.arrayOf(PropTypes.number),
+};

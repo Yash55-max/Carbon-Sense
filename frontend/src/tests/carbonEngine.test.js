@@ -9,10 +9,13 @@ import {
   calcTransitEmissions,
   calcEnergyEmissions,
   calcFoodEmissions,
+  calcShoppingEmissions,
   calcTotalFootprint,
   validateDistance,
   validateNumericInput,
   calcPercentChange,
+  calcSmartRecommendations,
+  generateMockHistory,
 } from '../utils/carbonEngine';
 
 // ─── Input Validation ─────────────────────────────────────────────────────────
@@ -156,5 +159,115 @@ describe('calcPercentChange', () => {
   });
   it('handles zero previous value safely', () => {
     expect(calcPercentChange(100, 0)).toBe(0);
+  });
+  it('calculates positive increase correctly', () => {
+    expect(calcPercentChange(500, 400)).toBeCloseTo(25, 0);
+  });
+});
+
+// ─── Shopping Calculations ─────────────────────────────────────────────────
+
+describe('calcShoppingEmissions', () => {
+  it('high shopping has higher emissions than low', () => {
+    const high = calcShoppingEmissions('high');
+    const low  = calcShoppingEmissions('low');
+    expect(high).toBeGreaterThan(low);
+  });
+  it('medium shopping returns 60 kg/month (2.0 * 30)', () => {
+    expect(calcShoppingEmissions('medium')).toBeCloseTo(60, 1);
+  });
+  it('defaults to medium for unknown spending level', () => {
+    const unknown = calcShoppingEmissions('unknown');
+    const medium  = calcShoppingEmissions('medium');
+    expect(unknown).toBe(medium);
+  });
+});
+
+// ─── Smart Recommendations ─────────────────────────────────────────────────
+
+describe('calcSmartRecommendations', () => {
+  it('returns at least 3 recommendations for any input', () => {
+    const activities = { transit: 42, energy: 185, food: 68, shopping: 25 };
+    const recs = calcSmartRecommendations(activities);
+    expect(recs.length).toBeGreaterThanOrEqual(3);
+    expect(recs.length).toBeLessThanOrEqual(3);
+  });
+
+  it('each recommendation has required fields', () => {
+    const activities = { transit: 200, energy: 200, food: 200, shopping: 100 };
+    const recs = calcSmartRecommendations(activities);
+    recs.forEach(rec => {
+      expect(rec).toHaveProperty('title');
+      expect(rec).toHaveProperty('category');
+      expect(rec).toHaveProperty('potentialReduction');
+      expect(rec).toHaveProperty('color');
+    });
+  });
+
+  it('recommends transit reduction when transit > 100 kg', () => {
+    const activities = { transit: 265, energy: 0, food: 0, shopping: 0 };
+    const recs = calcSmartRecommendations(activities);
+    const transitRec = recs.find(r => r.category === 'TRANSPORT');
+    expect(transitRec).toBeDefined();
+  });
+
+  it('recommends food reduction when food > 80 kg', () => {
+    const activities = { transit: 0, energy: 0, food: 135, shopping: 0 };
+    const recs = calcSmartRecommendations(activities);
+    const foodRec = recs.find(r => r.category === 'FOOD & DIET');
+    expect(foodRec).toBeDefined();
+  });
+
+  it('potential reduction percentage is a finite positive number', () => {
+    const activities = { transit: 265, energy: 171, food: 135, shopping: 60 };
+    const recs = calcSmartRecommendations(activities);
+    recs.forEach(rec => {
+      expect(isFinite(rec.potentialReduction)).toBe(true);
+      expect(rec.potentialReduction).toBeGreaterThan(0);
+    });
+  });
+});
+
+// ─── Mock History Generator ────────────────────────────────────────────────
+
+describe('generateMockHistory', () => {
+  it('returns exactly 30 data points', () => {
+    const history = generateMockHistory(320);
+    expect(history).toHaveLength(30);
+  });
+
+  it('each data point has date and kg properties', () => {
+    const history = generateMockHistory(320);
+    history.forEach(point => {
+      expect(point).toHaveProperty('date');
+      expect(point).toHaveProperty('kg');
+      expect(typeof point.date).toBe('string');
+      expect(typeof point.kg).toBe('number');
+    });
+  });
+
+  it('all kg values are positive finite numbers', () => {
+    const history = generateMockHistory(420);
+    history.forEach(point => {
+      expect(isFinite(point.kg)).toBe(true);
+      expect(point.kg).toBeGreaterThan(0);
+    });
+  });
+
+  it('kg values cluster near the provided base value', () => {
+    const base = 300;
+    const history = generateMockHistory(base);
+    const avg = history.reduce((sum, p) => sum + p.kg, 0) / history.length;
+    // Average should be within 30% of base (allowing for sin variation)
+    expect(avg).toBeGreaterThan(base * 0.7);
+    expect(avg).toBeLessThan(base * 1.3);
+  });
+
+  it('uses default base of 420 when called with no args', () => {
+    const history = generateMockHistory();
+    expect(history).toHaveLength(30);
+    const avg = history.reduce((sum, p) => sum + p.kg, 0) / history.length;
+    expect(avg).toBeGreaterThan(300);
+    expect(avg).toBeLessThan(550);
   });
 });

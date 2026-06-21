@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { Trees, Smartphone, Car, Timer } from 'lucide-react';
 import { calcEquivalency } from '../../utils/carbonEngine';
 
@@ -89,3 +90,8 @@ export default function EquivalencyGrid({ kgCO2e = 420 }) {
     </section>
   );
 }
+
+EquivalencyGrid.propTypes = {
+  /** Total monthly footprint in kg CO2e */
+  kgCO2e: PropTypes.number,
+};

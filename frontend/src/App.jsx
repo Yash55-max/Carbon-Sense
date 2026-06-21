@@ -9,6 +9,7 @@ import { onAuthStateChanged, handleGoogleRedirectResult } from './firebase/auth'
 import { getUserProfile } from './firebase/db';
 import { CarbonProtocolProvider } from './context/CarbonProtocolContext';
 import Sidebar from './components/shared/Sidebar';
+import ErrorBoundary from './components/shared/ErrorBoundary';
 
 // Pages
 const Landing     = lazy(() => import('./pages/Landing'));
@@ -16,6 +17,7 @@ const Dashboard   = lazy(() => import('./pages/Dashboard'));
 const LogActivity = lazy(() => import('./pages/LogActivity'));
 const Insights    = lazy(() => import('./pages/Insights'));
 const Challenges  = lazy(() => import('./pages/Challenges'));
+const Settings    = lazy(() => import('./pages/Settings'));
 
 // ─── Auth state hook ──────────────────────────────────────────────────────────
 
@@ -73,7 +75,9 @@ function ProtectedLayout({ user, profile }) {
           Skip to main content
         </a>
         <Sidebar />
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </div>
     </CarbonProtocolProvider>
   );
@@ -113,7 +117,7 @@ export default function App() {
             <Route path="/log-activity" element={<LogActivity />} />
             <Route path="/insights"     element={<Insights />} />
             <Route path="/challenges"   element={<Challenges />} />
-            <Route path="/settings"     element={<Dashboard />} />
+            <Route path="/settings"     element={<Settings />} />
           </Route>
 
           {/* Catch-all */}
